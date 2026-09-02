@@ -93,23 +93,66 @@
 
 			}
 
+	// Portfolio section tabs under About Me.
+		var tabAliases = {
+			'learning-experience': 'featured-work',
+			'ux-design': 'featured-work',
+			'software-prototypes': 'software-projects',
+			'physical-computing': 'hardware-projects'
+		};
+
+		function activateTab(id) {
+			id = tabAliases[id] || id;
+			var $tab = $('.section-tab[data-tab="' + id + '"]');
+
+			if (!$tab.length) {
+				return false;
+			}
+
+			$('.section-tab').removeClass('is-active').attr('aria-selected', 'false');
+			$('.tab-panel').removeClass('is-active');
+			$tab.addClass('is-active').attr('aria-selected', 'true');
+			$('#' + id).addClass('is-active');
+			return true;
+		}
+
+		$('.section-tab').on('click', function() {
+			var id = $(this).attr('data-tab');
+
+			if (activateTab(id) && history.replaceState) {
+				history.replaceState(null, '', '#' + id);
+			}
+		});
+
+		var initialHash = window.location.hash.replace('#', '');
+
+		if (initialHash) {
+			if (!activateTab(initialHash)) {
+				var $parentPanel = $('#' + initialHash).closest('.tab-panel');
+
+				if ($parentPanel.length) {
+					activateTab($parentPanel.attr('id'));
+				}
+			}
+		}
+
 	// Main Sections: Two.
 
-		// Lightbox gallery.
+		// Open the same destination as the project title, not a lightbox.
 			$window.on('load', function() {
 
-				$('#two').poptrox({
-					caption: function($a) { return $a.next('h3').text(); },
-					overlayColor: '#2c2c2c',
-					overlayOpacity: 0.85,
-					popupCloserText: '',
-					popupLoaderText: '',
-					selector: '.work-item a.image',
-					usePopupCaption: true,
-					usePopupDefaultStyling: false,
-					usePopupEasyClose: false,
-					usePopupNav: true,
-					windowMargin: (breakpoints.active('<=small') ? 0 : 50)
+				$('.work-item').each(function() {
+					var $titleLink = $(this).find('h3 a').first();
+					var $imageLink = $(this).find('a.image').first();
+
+					if ($titleLink.length && $imageLink.length) {
+						$imageLink.attr('href', $titleLink.attr('href'));
+					}
+
+					$(this).find('a.image, .project-action').attr({
+						target: '_blank',
+						rel: 'noopener noreferrer'
+					});
 				});
 
 			});
